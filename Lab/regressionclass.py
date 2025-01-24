@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as stats
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
 
@@ -43,7 +44,7 @@ class LinearRegression:
     
     @property
     def var(self):
-        return self.SSE()/(self.n-self.d-1)
+        return self.SSE/(self.n-self.d-1)
     
     @property
     def std(self):
@@ -61,10 +62,22 @@ class LinearRegression:
     def R2(self):
         return self.SSR / self.SST
     
+    @property
+    def F_test(self):
+        f = stats.f(test.d, test.n-test.d-1)
+        f_stat = (self.SSR/self.d)/self.var
+        return f.sf(f_stat)
+    
     
 
 test = LinearRegression(df,"Flow")
 
-print(test.R2)
-    
+#print(test.R2)
+f = stats.f(test.d, test.n-test.d-1)
+#x = np.linspace(0,10,100)
+#plt.plot(x, f.pdf(x))
+#plt.show()
+
+print(test.F_test)
+
         
