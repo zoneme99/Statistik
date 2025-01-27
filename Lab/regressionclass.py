@@ -93,12 +93,7 @@ class LinearRegression:
                     continue
                 print(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}")
 
-            
-
-        
-
-    
-    
+              
 
 test = LinearRegression(df,"Flow")
 
