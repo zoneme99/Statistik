@@ -48,7 +48,7 @@ class LinearRegression:
     
     @property
     def std(self):
-        return np.sqrt(self.var())
+        return np.sqrt(self.var)
     
     @property
     def SSR(self):
@@ -68,16 +68,35 @@ class LinearRegression:
         f_stat = (self.SSR/self.d)/self.var
         return f.sf(f_stat)
     
+
+    @property
+    def covar_matrix(self):
+        return (np.linalg.pinv(test.X[:,1:].T @ test.X[:,1:]))*test.var
+    
+    def T_test(self, feature):
+        cindex = self._X[1:].columns.get_loc(feature)
+        Bhat = self.B[cindex]
+        C = self.covar_matrix[cindex-1,cindex-1] #cindex not reset to 0
+        T_stat = Bhat/(self.std*np.sqrt(C))
+        t_object = stats.t(test.n-test.d-1)
+        p_value = 2*min(t_object.cdf(T_stat), t_object.sf(T_stat))
+        return p_value
+
+        
+
+    
     
 
 test = LinearRegression(df,"Flow")
 
+
 #print(test.R2)
-f = stats.f(test.d, test.n-test.d-1)
 #x = np.linspace(0,10,100)
 #plt.plot(x, f.pdf(x))
 #plt.show()
 
-print(test.F_test)
+#print(test.F_test)
+for feature in test._X.drop("bias", axis=1).columns:
+    print(f"{feature} : {test.T_test(feature)}")
 
         

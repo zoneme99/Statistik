@@ -1,12 +1,5 @@
-import pandas as pd
 import numpy as np
 
-df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
-#print(type(df))
-X = df.drop('Flow', axis=1)
-Y = df['Flow']
+ar = np.array([[1,2,3],[4,5,6],[7,8,9]])
 
-
-X.insert(0, "1", np.ones(X.shape[0]))
-b = np.linalg.pinv(X.T @ X) @ X.T @ Y
-print(b)
+print(np.delete(ar,0,axis=1))
