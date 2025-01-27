@@ -73,6 +73,7 @@ class LinearRegression:
     def covar_matrix(self):
         return (np.linalg.pinv(test.X[:,1:].T @ test.X[:,1:]))*test.var
     
+    #Double sided T-test
     def T_test(self, feature):
         cindex = self._X[1:].columns.get_loc(feature)
         Bhat = self.B[cindex]
@@ -81,6 +82,18 @@ class LinearRegression:
         t_object = stats.t(test.n-test.d-1)
         p_value = 2*min(t_object.cdf(T_stat), t_object.sf(T_stat))
         return p_value
+    
+    #Compare all features with eachother
+    @property
+    def Pearson_pairs(self):
+        features = self._X.drop("bias", axis=1).columns
+        for x in range(len(features)):
+            for y in range(x,len(features)):
+                if features[x] == features[y]:
+                    continue
+                print(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}")
+
+            
 
         
 
@@ -96,7 +109,9 @@ test = LinearRegression(df,"Flow")
 #plt.show()
 
 #print(test.F_test)
-for feature in test._X.drop("bias", axis=1).columns:
-    print(f"{feature} : {test.T_test(feature)}")
 
-        
+# for feature in test._X.drop("bias", axis=1).columns:
+#     print(f"{feature} : {test.T_test(feature)}")
+
+test.Pearson_pairs
+
