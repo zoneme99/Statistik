@@ -1,5 +1,5 @@
 import numpy as np
+import pandas as pd
 
-ar = np.array([[1,2,3],[4,5,6],[7,8,9]])
-
-print(np.delete(ar,0,axis=1))
+df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
+print(df.columns.get_loc("Kinematic"))

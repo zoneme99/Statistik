@@ -1,16 +1,15 @@
 import numpy as np
 import scipy.stats as stats
 import pandas as pd
-import matplotlib.pyplot as plt
-
-df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
 
 class LinearRegression:
-    def __init__(self, matrix, yvariable):
+    def __init__(self, matrix, yvariable, confedence_level = 0.95):
         if isinstance(matrix, pd.DataFrame):
             (n, d) = matrix.shape
             self._n = n
             self._d = d
+            self._conf_level = confedence_level
+            self._matrix = matrix
             self._Y = matrix[yvariable]
             self._X = matrix.drop(yvariable, axis=1)
             self._X.insert(0, "bias", np.ones(self._X.shape[0]))
@@ -27,20 +26,28 @@ class LinearRegression:
         return self._d
     
     @property
+    def conf_level(self):
+        return self._conf_level
+    
+    @property
+    def matrix(self):
+        return self._matrix
+    
+    @property
     def Y(self):
-        return self._Y.to_numpy()
+        return self._Y
     
     @property
     def X(self):
-        return self._X.to_numpy()
+        return self._X
     
     @property
     def B(self):
-        return self._B.to_numpy()
+        return self._B
     
     @property
     def SSE(self):
-        return np.sum(np.square(self.Y - self.X @ self.B))
+        return np.sum(np.square(self.Y.to_numpy() - self.X.to_numpy() @ self.B.to_numpy()))
     
     @property
     def var(self):
@@ -52,11 +59,11 @@ class LinearRegression:
     
     @property
     def SSR(self):
-        return (self.n*np.sum(self.B*(self.X.T @ self.Y)) - (np.square(np.sum(self.Y))))/self.n
+        return (self.n*np.sum(self.B.to_numpy()*(self.X.to_numpy().T @ self.Y.to_numpy())) - (np.square(np.sum(self.Y.to_numpy()))))/self.n
     
     @property
     def SST(self):
-        return (self.n*np.sum(np.square(self.Y)) - np.square(np.sum(self.Y)))/self.n
+        return (self.n*np.sum(np.square(self.Y.to_numpy())) - np.square(np.sum(self.Y.to_numpy())))/self.n
     
     @property
     def R2(self):
@@ -64,22 +71,22 @@ class LinearRegression:
     
     @property
     def F_test(self):
-        f = stats.f(test.d, test.n-test.d-1)
+        f = stats.f(self.d, self.n-self.d-1)
         f_stat = (self.SSR/self.d)/self.var
         return f.sf(f_stat)
     
 
     @property
     def covar_matrix(self):
-        return (np.linalg.pinv(test.X[:,1:].T @ test.X[:,1:]))*test.var
+        return (np.linalg.pinv(self.X.to_numpy()[:,1:].T @ self.X.to_numpy()[:,1:]))*self.var
     
     #Double sided T-test
     def T_test(self, feature):
-        cindex = self._X[1:].columns.get_loc(feature)
-        Bhat = self.B[cindex]
+        cindex = self.X.columns.get_loc(feature)
+        Bhat = self.B.to_numpy()[cindex]
         C = self.covar_matrix[cindex-1,cindex-1] #cindex not reset to 0
         T_stat = Bhat/(self.std*np.sqrt(C))
-        t_object = stats.t(test.n-test.d-1)
+        t_object = stats.t(self.n-self.d-1)
         p_value = 2*min(t_object.cdf(T_stat), t_object.sf(T_stat))
         return p_value
     
@@ -91,22 +98,11 @@ class LinearRegression:
             for y in range(x,len(features)):
                 if features[x] == features[y]:
                     continue
-                print(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}")
-
-              
-
-test = LinearRegression(df,"Flow")
+                print(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}")      
 
 
-#print(test.R2)
-#x = np.linspace(0,10,100)
-#plt.plot(x, f.pdf(x))
-#plt.show()
-
-#print(test.F_test)
-
-# for feature in test._X.drop("bias", axis=1).columns:
-#     print(f"{feature} : {test.T_test(feature)}")
-
-test.Pearson_pairs
-
+if  __name__ == "__main__":
+    df = pd.read_csv("Lab/Small-diameter-flow.csv")
+    test = LinearRegression(df,"Flow")
+    #print(test.T_test("Observer"))
+    print(test.conf_level)
