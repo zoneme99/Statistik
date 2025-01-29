@@ -3,7 +3,7 @@ import scipy.stats as stats
 import pandas as pd
 
 class LinearRegression:
-    def __init__(self, matrix, yvariable, confedence_level = 0.95):
+    def __init__(self, matrix, yvariable, confedence_level = 0.05):
         if isinstance(matrix, pd.DataFrame):
             (n, d) = matrix.shape
             self._n = n
@@ -93,16 +93,31 @@ class LinearRegression:
     #Compare all features with eachother
     @property
     def Pearson_pairs(self):
+        output = list()
         features = self._X.drop("bias", axis=1).columns
         for x in range(len(features)):
             for y in range(x,len(features)):
                 if features[x] == features[y]:
                     continue
-                print(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}")      
+                output.append(f"{features[x]}/{features[y]} : {stats.pearsonr(self._X[features[x]], self._X[features[y]])}\n")
+        return  ''.join(output)
+    
+    @property
+    def conf_interval_features(self):
+        output = list()
+        features = list(self.X.columns)
+        features.remove('bias')
+        t_object = stats.t(self.n-self.d-1)
+
+        for index in range(len(features)):
+            t_point = t_object.ppf(self.conf_level/2)*self.var*np.sqrt(self.covar_matrix[index][index])
+            output.append(f"{features[index]} : {self.B[index+1]} +/- {t_point}\n") #not consider bias therefore +1
+        return ''.join(output)
+            
 
 
 if  __name__ == "__main__":
-    df = pd.read_csv("Lab/Small-diameter-flow.csv")
+    df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
     test = LinearRegression(df,"Flow")
     #print(test.T_test("Observer"))
-    print(test.conf_level)
+    print(test.conf_intervall_features)
