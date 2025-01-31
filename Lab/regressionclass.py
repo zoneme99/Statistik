@@ -58,16 +58,16 @@ class LinearRegression:
         return np.sqrt(self.var)
     
     @property
-    def SSR(self):
-        return (self.n*np.sum(self.B.to_numpy()*(self.X.to_numpy().T @ self.Y.to_numpy())) - (np.square(np.sum(self.Y.to_numpy()))))/self.n
-    
-    @property
-    def SST(self):
+    def Syy(self):
         return (self.n*np.sum(np.square(self.Y.to_numpy())) - np.square(np.sum(self.Y.to_numpy())))/self.n
     
     @property
+    def SSR(self):
+        return self.Syy-self.SSE
+    
+    @property
     def R2(self):
-        return self.SSR / self.SST
+        return self.SSR / self.Syy
     
     @property
     def F_test(self):
@@ -113,11 +113,3 @@ class LinearRegression:
             t_point = t_object.ppf(self.conf_level/2)*self.var*np.sqrt(self.covar_matrix[index][index])
             output.append(f"{features[index]} : {self.B[index+1]} +/- {t_point}\n") #not consider bias therefore +1
         return ''.join(output)
-            
-
-
-if  __name__ == "__main__":
-    df = pd.read_csv("Lab/Small-diameter-flow.csv", index_col=0)
-    test = LinearRegression(df,"Flow")
-    #print(test.T_test("Observer"))
-    print(test.conf_intervall_features)
